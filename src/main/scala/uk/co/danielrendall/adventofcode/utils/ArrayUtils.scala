@@ -4,7 +4,7 @@ import scala.reflect.ClassTag
 
 object ArrayUtils {
 
-  def buildBorderedArray[T](seq: LazyList[String],
+  def buildBorderedArray[T](seq: Seq[String],
                             charToT: Char => T,
                             borderValue: T)
                            (implicit ct: ClassTag[T]): Array2D[T] =
@@ -55,7 +55,32 @@ object ArrayUtils {
       Array2D(newArray, width, height)
     }
 
-    override def toString: String = array.map(_.mkString(",")).mkString("\n")
+    override def toString: String =
+      (1 to height).map(array.apply).map { row =>
+        (1 to width).map(row.apply).mkString(",")
+      }.mkString("\n")
+
+    def update(loc: Loc, fn: T => T): Array2D[T] = {
+      val updated: Array[Array[T]] = array.zipWithIndex.map { case (row, rowIndex) =>
+        if (rowIndex != loc.y) row
+        else row.zipWithIndex.map { case (cell, columnIndex) =>
+          if (columnIndex != loc.x) cell
+            else fn(cell)
+        }
+      }
+      copy(array = updated)
+    }
+
+    def updateMut(loc: Loc, fn: T => T): Array2D[T] = {
+      val cur = array(loc.y)(loc.x)
+      array(loc.y)(loc.x) = fn(cur)
+      this
+    }
+
+    def get(loc: Loc): T = array(loc.y)(loc.x)
+
+    // Returned true if loc is in the non-bordered part of this array
+    def contains(loc: Loc): Boolean = loc.x >= 1 && loc.x <= width && loc.y >= 1 && loc.y <= height
 
   }
 
