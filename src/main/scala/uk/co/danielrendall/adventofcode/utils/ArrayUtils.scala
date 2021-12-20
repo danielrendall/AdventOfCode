@@ -17,11 +17,12 @@ object ArrayUtils {
     Array2D(array, width, height)
 
 
+  // Width and Height don't include the border
   case class Array2D[T](array: Array[Array[T]], width: Int, height: Int)
                        (implicit classTag: ClassTag[T]) {
 
     private lazy val borderLine: Array[T] = array.head
-    private lazy val borderValue: T = borderLine.head
+    lazy val borderValue: T = borderLine.head
 
     def locs: Seq[Loc] = for {
       y <- 1 to height
@@ -55,9 +56,11 @@ object ArrayUtils {
       Array2D(newArray, width, height)
     }
 
-    override def toString: String =
+    override def toString: String = toString(",")
+
+    def toString(sep: String): String =
       (1 to height).map(array.apply).map { row =>
-        (1 to width).map(row.apply).mkString(",")
+        (1 to width).map(row.apply).mkString(sep)
       }.mkString("\n")
 
     def update(loc: Loc, fn: T => T): Array2D[T] = {
@@ -71,17 +74,40 @@ object ArrayUtils {
       copy(array = updated)
     }
 
+    // Beware - mutates the arrays - need to make sure they aren't the same object!
     def updateMut(loc: Loc, fn: T => T): Array2D[T] = {
       val cur = array(loc.y)(loc.x)
       array(loc.y)(loc.x) = fn(cur)
       this
     }
 
+    def expand: Array2D[T] = {
+      val newWidth = width + 2
+      val newHeight = height + 2
+      Array2D.fill(newWidth, newHeight)(borderValue).map { loc =>
+        get(loc.upLeft)
+      }
+    }
+
     def get(loc: Loc): T = array(loc.y)(loc.x)
+
+    def count(pred: T => Boolean): Int = locs.count(l => pred(get(l)))
+
+    def withNewBorder(newBorder: T): Array2D[T] = map(loc => get(loc), newBorder)
 
     // Returned true if loc is in the non-bordered part of this array
     def contains(loc: Loc): Boolean = loc.x >= 1 && loc.x <= width && loc.y >= 1 && loc.y <= height
 
+  }
+
+  object Array2D {
+
+    def fill[T](width: Int, height: Int)
+               (init: T)
+               (implicit ct: ClassTag[T]): Array2D[T] = {
+      val emptyRow = List.fill[T](width + 2)(init)
+      Array2D(LazyList.continually(emptyRow.toArray).take(height + 1).toArray, width, height)
+    }
   }
 
   case class Loc(x: Int, y: Int) {
