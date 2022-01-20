@@ -8,5 +8,5 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
+    libraryDependencies += "org.specs2" %% "specs2-core" % "5.0.0-RC-22" % Test
   )
