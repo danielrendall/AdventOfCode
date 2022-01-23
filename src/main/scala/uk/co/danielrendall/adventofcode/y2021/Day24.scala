@@ -17,33 +17,15 @@ object Day24 {
 
   val data: LazyList[String] = this.getClass.getResourceAsStream("/2021/day24.txt").lines
 
-  /**
-   * Figures derived from studying the data.
-   */
-  val operations: List[CalculationStep] = List(
-    Operation(1, 10, 10),
-    Operation(1, 13, 5),
-    Operation(1, 15, 12),
-    Operation(26, -12, 12),
-    Operation(1, 14, 6),
-    Operation(26, -2, 4),
-    Operation(1, 13, 15),
-    Operation(26, -12, 3),
-    Operation(1, 15, 7),
-    Operation(1, 11, 11),
-    Operation(26, -3, 2),
-    Operation(26, -13, 12),
-    Operation(26, -12, 4),
-    Operation(26, -13, 11),
-  )
-
-
   @main def d24p1() =
     def solve(seq: Seq[String]): Unit =
       val allInstructions = parse(seq)
 
-      val groups: List[CalculationStep] =
+      val groups: List[InstructionGroup] =
         allInstructions.grouped(18).toList.map(instructions => InstructionGroup(instructions.toList))
+
+      val operations: List[Operation] = groups.map(_.toOperation)
+      operations.foreach(println)
 
       val rnd = new Random()
       def r = rnd.nextInt(9) + 1
@@ -120,6 +102,16 @@ object Day24 {
           Some(nextState)
         case Nil => None
       }
+
+    def toOperation: Operation = {
+      // Just need the three parameters
+      instructions match {
+        case _ :: _ :: _ :: _ :: Div(Z, Lit(v1)) :: Add(X, Lit(v2)) :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: Add(Y, Lit(v3)) :: rest =>
+          Operation(v1, v2, v3)
+        case _ =>
+          throw new IllegalArgumentException("Bad params")
+      }
+    }
 
 
   }
