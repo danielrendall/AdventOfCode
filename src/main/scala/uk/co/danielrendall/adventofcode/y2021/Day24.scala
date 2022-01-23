@@ -13,6 +13,9 @@ object Day24 {
   /**
    * Notes: data turns out to be a set of 252 instructions, but split into repeated groups of 18 instructions. Each
    * group of 18 starts with "inp w", and all the groups are identical except for 3 numbers which differ between them.
+   *
+   * Note that we can disregard the values of x, y and w after each group as they're always reset to specific values.
+   * Only the value of z is carried forward.
    */
 
   val data: LazyList[String] = this.getClass.getResourceAsStream("/2021/day24.txt").lines
@@ -28,15 +31,16 @@ object Day24 {
       operations.foreach(println)
 
       val rnd = new Random()
+
       def r = rnd.nextInt(9) + 1
 
       (0 to 10000).foreach { i =>
-        val state = State(0, 0, 0, 0, List(r,r,r,r,r,r,r,r,r,r,r,r,r,r))
+        val state = State(0, 0, 0, 0, List(r, r, r, r, r, r, r, r, r, r, r, r, r, r))
 
         val finalState = (operations.zip(groups)).foldLeft(state) { case (thisState, (op, grp)) =>
           val newOpState = op.run(thisState).getOrElse(throw new Exception("Ops out of data"))
           val newGrpState = grp.run(thisState).getOrElse(throw new Exception("Groups out of data"))
-          if (newOpState != newGrpState) {
+          if (newOpState.cleaned != newGrpState.cleaned) {
             throw new Exception("Op state " + newOpState + " different from group state " + newGrpState)
           }
           newOpState
@@ -54,6 +58,7 @@ object Day24 {
 
   /**
    * Operation represents the operation carried out by each group of 18 instructions, and takes the 3 parameters.
+   *
    * @param v1
    * @param v2
    * @param v3
@@ -64,19 +69,13 @@ object Day24 {
       state.waitingInput match {
         case _ :: rest =>
           val w: BigInt = state.waitingInput.head
-          var x: BigInt = 0
-          var y: BigInt = 0
-          var z: BigInt = state.z
+          val z0: BigInt = state.z
 
-          x = z % 26 + v2
-          z = z / v1
-          x = (if (x == w) 0 else 1)
-          y = 25 * x + 1
-          z = z * y
-          y = w + v3
-          y = y * x
-          z = z + y
-          Some(State(w, x, y, z, rest))
+          val x1: BigInt = z0 % 26 + v2
+          val z1 = z0 / v1
+          val x2 = (if (x1 == w) 0 else 1)
+          val z2 = z1 * (25 * x2 + 1) + (w + v3) * x2
+          Some(State(0, 0, 0, z2, rest))
         case Nil => None
       }
     }
@@ -120,6 +119,8 @@ object Day24 {
 
   case class State(w: BigInt, x: BigInt, y: BigInt, z: BigInt, waitingInput: List[BigInt]) {
     override def toString: String = "W=%3d X=%3d Y=%3d Z=%3d Input=%s".format(w, x, y, z, waitingInput.map(_.toString).mkString)
+
+    def cleaned: State = copy(w = 0, x = 0, y = 0)
   }
 
   object State {
