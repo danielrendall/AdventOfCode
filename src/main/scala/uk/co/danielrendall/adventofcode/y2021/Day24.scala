@@ -64,23 +64,16 @@ object Day24 {
       state.waitingInput match {
         case _ :: rest =>
           val w: BigInt = state.waitingInput.head
-          var x: BigInt = state.x
-          var y: BigInt = state.y
+          var x: BigInt = 0
+          var y: BigInt = 0
           var z: BigInt = state.z
 
-          x = z
-          x = x % 26
+          x = z % 26 + v2
           z = z / v1
-          x = x + v2
-          x = (if (x == w) 1 else 0)
-          x = (if (x == 0) 1 else 0)
-          y = 25
-          y = y * x
-          y = y + 1
+          x = (if (x == w) 0 else 1)
+          y = 25 * x + 1
           z = z * y
-          y = 0
-          y = y + w
-          y = y + v3
+          y = w + v3
           y = y * x
           z = z + y
           Some(State(w, x, y, z, rest))
