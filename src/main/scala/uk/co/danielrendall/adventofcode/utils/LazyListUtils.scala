@@ -17,4 +17,26 @@ object LazyListUtils {
 
       getGroup.map(seq =>  seq #:: list.tail.windowed(size)).getOrElse(LazyList.empty)
 
+    /**
+     * Group the items by some separator
+     * @param separator
+     * @return
+     */
+    def groupSeparatedBy(separator: A): LazyList[Seq[A]] =
+      LazyList.unfold(list) { l =>
+        val seq = l.takeWhile(_ != separator)
+        if (seq.nonEmpty) {
+          val rem = l.drop(seq.length)
+          if (rem.nonEmpty) {
+            Some((seq, rem.tail))
+          } else {
+            Some((seq, LazyList.empty))
+
+          }
+        } else {
+          None
+        }
+      }
+
+
 }
