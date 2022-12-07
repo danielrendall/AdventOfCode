@@ -1,5 +1,7 @@
 package uk.co.danielrendall.adventofcode.utils
 
+import scala.annotation.tailrec
+
 object LazyListUtils {
 
   extension[A] (list: Seq[A])
@@ -31,6 +33,42 @@ object LazyListUtils {
             Some((seq, rem.tail))
           } else {
             Some((seq, LazyList.empty))
+          }
+        } else {
+          None
+        }
+      }
+
+    /**
+     * Group the items into clumps where the first item in each clump matches the predicate
+     * @param newGroup
+     * @return
+     */
+    def groupStartingWith(newGroup: A => Boolean): LazyList[Seq[A]] =
+      LazyList.unfold(list) { l =>
+
+        @tailrec
+        def readSeq(theList: Seq[A], accum: List[A]): (List[A], Seq[A]) =
+          theList.headOption match
+            case Some(value) =>
+              if (newGroup(value)) {
+                if (accum.isEmpty) {
+                  readSeq(theList.tail, List(value))
+                } else {
+                  (accum.reverse, theList)
+                }
+              } else {
+                readSeq(theList.tail, value :: accum)
+              }
+            case None =>
+              (accum.reverse, Seq.empty)
+
+        val (toReturn, rest) = readSeq(l, List.empty)
+        if (toReturn.nonEmpty) {
+          if (rest.nonEmpty) {
+            Some((toReturn, rest))
+          } else {
+            Some((toReturn, LazyList.empty))
 
           }
         } else {
