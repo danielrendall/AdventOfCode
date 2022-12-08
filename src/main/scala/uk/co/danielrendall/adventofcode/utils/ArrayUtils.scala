@@ -41,6 +41,21 @@ object ArrayUtils {
       Array2D(newArray, width, height)
     }
 
+    def mapValues[U](fn: T => U)
+                    (implicit ctU: ClassTag[U]): Array2D[U] = {
+      val newBorder = fn(borderValue)
+      val newBorderLine = borderLine.map(fn)
+      val middle = (for {
+        y <- 1 to height
+      } yield {
+        (newBorder +: (for {
+          x <- 1 to width
+        } yield (fn(get(Loc(x, y))))) :+ newBorder).toArray[U]
+      }).toArray[Array[U]]
+      val newArray: Array[Array[U]] = newBorderLine +: middle :+ newBorderLine
+      Array2D(newArray, width, height)
+    }
+
     def map[W](fn: Loc => W,
                borderValue: W)
               (implicit classTag: ClassTag[W]): Array2D[W] = {
@@ -55,6 +70,10 @@ object ArrayUtils {
       val newArray: Array[Array[W]] = firstAndLast +: middle :+ firstAndLast
       Array2D(newArray, width, height)
     }
+
+    def max(implicit ordering: Ordering[T]): T = locs.map(get).max
+
+    def min(implicit ordering: Ordering[T]): T = locs.map(get).min
 
     override def toString: String = toString(",")
 
@@ -81,6 +100,11 @@ object ArrayUtils {
       this
     }
 
+    // Mutates the array!
+    def set(loc: Loc, t: T): Unit = {
+      array(loc.y)(loc.x) = t
+    }
+
     def expand: Array2D[T] = {
       val newWidth = width + 2
       val newHeight = height + 2
@@ -88,6 +112,42 @@ object ArrayUtils {
         get(loc.upLeft)
       }
     }
+
+    def rowIteratorLR: LazyList[LazyList[Loc]] = {
+      for (y <- numList(1, height)) yield {
+        for (x <- numList(1, width)) yield Loc(x, y)
+      }
+    }
+
+    def rowIteratorRL: LazyList[LazyList[Loc]] = {
+      for (y <- numList(1, height)) yield {
+        for (x <- numList(1, width)) yield Loc((width - x + 1), y)
+      }
+    }
+
+    def columnIteratorTD: LazyList[LazyList[Loc]] = {
+      for (x <- numList(1, width)) yield {
+        for (y <- numList(1, height)) yield Loc(x, y)
+      }
+    }
+
+    def columnIteratorDT: LazyList[LazyList[Loc]] = {
+      for (x <- numList(1, width)) yield {
+        for (y <- numList(1, height)) yield Loc(x, (height - y + 1))
+      }
+    }
+
+
+    def zip[U](other: Array2D[U]): Array2D[(T, U)] = {
+      assert (width == other.width && height == other.height)
+      val newArray = Array2D.fill(width, height)((borderValue, other.borderValue))
+      locs.foreach(loc => newArray.set(loc, (get(loc), other.get(loc))))
+      newArray
+    }
+
+
+    private def numList(start: Int, inclusiveEnd: Int): LazyList[Int] =
+      (start to inclusiveEnd).to(LazyList)
 
     def get(loc: Loc): T = array(loc.y)(loc.x)
 
@@ -108,6 +168,35 @@ object ArrayUtils {
       val emptyRow = List.fill[T](width + 2)(init)
       Array2D(LazyList.continually(emptyRow.toArray).take(height + 1).toArray, width, height)
     }
+
+
+    // TODO - implement me
+    implicit def Array2DIsNumeric[T : Numeric](implicit classTag: ClassTag[T]): Numeric[Array2D[T]] = new Numeric[Array2D[T]] {
+      val numericForT: Numeric[T] = implicitly[Numeric[T]]
+
+      override def plus(x: Array2D[T], y: Array2D[T]): Array2D[T] = ???
+
+      override def minus(x: Array2D[T], y: Array2D[T]): Array2D[T] = ???
+
+      override def times(x: Array2D[T], y: Array2D[T]): Array2D[T] = x.zip(y).mapValues((x, y) => numericForT.times(x, y))
+
+      override def negate(x: Array2D[T]): Array2D[T] = ???
+
+      override def fromInt(x: Int): Array2D[T] = ???
+
+      override def parseString(str: String): Option[Array2D[T]] = ???
+
+      override def toInt(x: Array2D[T]): Int = ???
+
+      override def toLong(x: Array2D[T]): Long = ???
+
+      override def toFloat(x: Array2D[T]): Float = ???
+
+      override def toDouble(x: Array2D[T]): Double = ???
+
+      override def compare(x: Array2D[T], y: Array2D[T]): Int = ???
+    }
+
   }
 
   case class Loc(x: Int, y: Int) {
