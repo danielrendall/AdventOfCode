@@ -6,6 +6,7 @@ import uk.co.danielrendall.adventofcode.utils.StreamUtils.*
 import uk.co.danielrendall.adventofcode.utils.StringUtils.*
 import uk.co.danielrendall.adventofcode.y2022.Day9.UpRight
 
+import scala.annotation.tailrec
 import scala.util.matching.Regex
 
 object Day9 {
@@ -34,38 +35,34 @@ object Day9 {
 
   @main def d9p1(): Unit =
     def solve(list: LazyList[String]) =
-      val singleHeadMoves: LazyList[Instruction] = list.flatMap(toInstructionSequence)
-      val tailMoves = LazyList.unfold[Option[Instruction], TailState](TailState(singleHeadMoves, 0, 0))(nextState).flatten
-      val (allVisited, finalLoc) = tailMoves.foldLeft((Set[Loc](Loc(0, 0)), Loc(0, 0))) { case ((visited, current), move) =>
-        val nextLocation = Loc(current.x + move.dx, current.y + move.dy)
-        (visited + nextLocation, nextLocation)
-      }
-      allVisited.size
+      solveWithNestedLazyLists(1, list)
 
     println("Test: " + solve(testData))
     println("Actual: " + solve(realData))
 
   @main def d9p2(): Unit =
     def solve(list: LazyList[String]) =
-      val singleHeadMoves: LazyList[Instruction] = list.flatMap(toInstructionSequence)
-      val knot1Moves = LazyList.unfold[Option[Instruction], TailState](TailState(singleHeadMoves, 0, 0))(nextState).flatten
-      val knot2Moves = LazyList.unfold[Option[Instruction], TailState](TailState(knot1Moves, 0, 0))(nextState).flatten
-      val knot3Moves = LazyList.unfold[Option[Instruction], TailState](TailState(knot2Moves, 0, 0))(nextState).flatten
-      val knot4Moves = LazyList.unfold[Option[Instruction], TailState](TailState(knot3Moves, 0, 0))(nextState).flatten
-      val knot5Moves = LazyList.unfold[Option[Instruction], TailState](TailState(knot4Moves, 0, 0))(nextState).flatten
-      val knot6Moves = LazyList.unfold[Option[Instruction], TailState](TailState(knot5Moves, 0, 0))(nextState).flatten
-      val knot7Moves = LazyList.unfold[Option[Instruction], TailState](TailState(knot6Moves, 0, 0))(nextState).flatten
-      val knot8Moves = LazyList.unfold[Option[Instruction], TailState](TailState(knot7Moves, 0, 0))(nextState).flatten
-      val knot9Moves = LazyList.unfold[Option[Instruction], TailState](TailState(knot8Moves, 0, 0))(nextState).flatten
-      val (allVisited, finalLoc) = knot9Moves.foldLeft((Set[Loc](Loc(0, 0)), Loc(0, 0))) { case ((visited, current), move) =>
-        val nextLocation = Loc(current.x + move.dx, current.y + move.dy)
-        (visited + nextLocation, nextLocation)
-      }
-      allVisited.size
+      solveWithNestedLazyLists(9, list)
 
     println("Test: " + solve(testData))
     println("Test2: " + solve(testData2))
     println("Actual: " + solve(realData))
+
+  def solveWithNestedLazyLists(knotNumber: Int, list: LazyList[String]): Int = {
+
+    @tailrec
+    def buildNestedLazyLists(remaining: Int, lastList: LazyList[Instruction]): LazyList[Instruction] = {
+      if (remaining == 0) lastList
+      else buildNestedLazyLists(remaining - 1, LazyList.unfold[Option[Instruction], TailState](TailState(lastList, 0, 0))(nextState).flatten)
+    }
+
+    val (allVisited, _) = buildNestedLazyLists(knotNumber, list.flatMap(toInstructionSequence))
+      .foldLeft((Set[Loc](Loc(0, 0)), Loc(0, 0))) { case ((visited, current), move) =>
+      val nextLocation = Loc(current.x + move.dx, current.y + move.dy)
+      (visited + nextLocation, nextLocation)
+    }
+    allVisited.size
+  }
 
   // Keep track of where the tail is relative to the head
   case class TailState(remainingHeadMoves: LazyList[Instruction], relX: Int, relY: Int)
