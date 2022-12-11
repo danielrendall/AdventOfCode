@@ -2,6 +2,7 @@ package uk.co.danielrendall.adventofcode.utils
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
+import scala.util.{Failure, Try}
 
 object LazyListUtils {
 
@@ -84,4 +85,15 @@ object LazyListUtils {
                           ev: A =:= String): ArrayUtils.Array2D[T] =
       ArrayUtils.buildBorderedArray(list.asInstanceOf[Seq[String]], fn, borderValue)
 
+    def parse[T](fn: A => Try[T]): Try[ParseResult[A, T]] =
+      list.headOption match
+        case Some(value) =>
+          fn(value).map(r => ParseResult(r, list.tail))
+        case None => Failure(new NoSuchElementException("Out of elements"))
+
+
+  case class ParseResult[A, T](result: T, rest: Seq[A]):
+
+    def apply() = result
+    def parse[U](fn: A => Try[U]): Try[ParseResult[A, U]] = rest.parse(fn)
 }
