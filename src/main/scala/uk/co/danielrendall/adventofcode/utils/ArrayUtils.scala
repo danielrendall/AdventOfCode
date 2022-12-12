@@ -87,7 +87,7 @@ object ArrayUtils {
         if (rowIndex != loc.y) row
         else row.zipWithIndex.map { case (cell, columnIndex) =>
           if (columnIndex != loc.x) cell
-            else fn(cell)
+          else fn(cell)
         }
       }
       copy(array = updated)
@@ -139,7 +139,7 @@ object ArrayUtils {
 
 
     def zip[U](other: Array2D[U]): Array2D[(T, U)] = {
-      assert (width == other.width && height == other.height)
+      assert(width == other.width && height == other.height)
       val newArray = Array2D.fill(width, height)((borderValue, other.borderValue))
       locs.foreach(loc => newArray.set(loc, (get(loc), other.get(loc))))
       newArray
@@ -158,6 +158,7 @@ object ArrayUtils {
     // Returned true if loc is in the non-bordered part of this array
     def contains(loc: Loc): Boolean = loc.x >= 1 && loc.x <= width && loc.y >= 1 && loc.y <= height
 
+    def findLocs(pred: T => Boolean): Seq[Loc] = locs.filter(l => pred(get(l)))
   }
 
   object Array2D {
@@ -171,7 +172,7 @@ object ArrayUtils {
 
 
     // TODO - implement me
-    implicit def Array2DIsNumeric[T : Numeric](implicit classTag: ClassTag[T]): Numeric[Array2D[T]] = new Numeric[Array2D[T]] {
+    implicit def Array2DIsNumeric[T: Numeric](implicit classTag: ClassTag[T]): Numeric[Array2D[T]] = new Numeric[Array2D[T]] {
       val numericForT: Numeric[T] = implicitly[Numeric[T]]
 
       override def plus(x: Array2D[T], y: Array2D[T]): Array2D[T] = ???
