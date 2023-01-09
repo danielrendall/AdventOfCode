@@ -2,7 +2,7 @@ package uk.co.danielrendall.adventofcode.y2022
 
 import uk.co.danielrendall.adventofcode.utils.ArrayUtils.Loc
 import uk.co.danielrendall.adventofcode.utils.LazyListUtils.*
-import uk.co.danielrendall.adventofcode.utils.LifoQueue
+import uk.co.danielrendall.adventofcode.utils.FifoQueue
 import uk.co.danielrendall.adventofcode.utils.StreamUtils.*
 import uk.co.danielrendall.adventofcode.utils.StringUtils.*
 
@@ -151,7 +151,7 @@ object Day11 {
 
   // Mutable
   class MonkeyState(initial: Seq[Long]) {
-    private val queue: LifoQueue[Long] = new LifoQueue[Long]()
+    private val queue: FifoQueue[Long] = new FifoQueue[Long]()
     private val handled: AtomicLong = new AtomicLong(0)
 
     queue.pushAll(initial)

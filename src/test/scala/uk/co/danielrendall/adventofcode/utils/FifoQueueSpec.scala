@@ -2,17 +2,17 @@ package uk.co.danielrendall.adventofcode.utils
 
 import org.specs2.mutable.Specification
 
-class LifoQueueSpec extends Specification {
+class FifoQueueSpec extends Specification {
 
   "LifoQueue" should {
     "Store a single element" in {
-      val queue = new LifoQueue[Int]()
+      val queue = new FifoQueue[Int]()
       queue.push(42)
       queue.pop() === 42
     }
 
     "Store two elements" in {
-      val queue = new LifoQueue[Int]()
+      val queue = new FifoQueue[Int]()
       queue.push(1)
       queue.push(2)
       queue.pop() === 1
@@ -20,7 +20,7 @@ class LifoQueueSpec extends Specification {
     }
 
     "Store two elements interleaved" in {
-      val queue = new LifoQueue[Int]()
+      val queue = new FifoQueue[Int]()
       queue.push(1)
       queue.pop() === 1
       queue.push(2)
@@ -28,7 +28,7 @@ class LifoQueueSpec extends Specification {
     }
 
     "Store ten elements" in {
-      val queue = new LifoQueue[Int]()
+      val queue = new FifoQueue[Int]()
       queue.push(1)
       queue.push(2)
       queue.push(3)
@@ -52,7 +52,7 @@ class LifoQueueSpec extends Specification {
     }
 
     "Store twenty elements interleaved" in {
-      val queue = new LifoQueue[Int]()
+      val queue = new FifoQueue[Int]()
       queue.push(1)
       queue.push(2)
       queue.pop() === 1
@@ -96,7 +96,7 @@ class LifoQueueSpec extends Specification {
     }
 
     "Push lots of elements at once" in {
-      val queue = new LifoQueue[Int]()
+      val queue = new FifoQueue[Int]()
       queue.pushAll(1 to 1000)
       queue.pop() === 1
       queue.pop() === 2
@@ -105,7 +105,7 @@ class LifoQueueSpec extends Specification {
     }
 
     "Throw exception if there's nothing left" in {
-      val queue = new LifoQueue[Int]()
+      val queue = new FifoQueue[Int]()
       queue.pushAll(1 to 1000)
       (0 until 999).foreach(_ => queue.pop())
       queue.pop() === 1000

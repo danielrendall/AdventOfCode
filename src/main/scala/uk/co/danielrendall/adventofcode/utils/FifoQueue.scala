@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 import scala.reflect.ClassTag
 
 /**
- * A mutable LIFO queue implementation
+ * A mutable FIFO queue implementation
  */
-class LifoQueue[T](implicit ct: ClassTag[T]) {
+class FifoQueue[T](implicit ct: ClassTag[T]) {
 
   private val arrayRef: AtomicReference[Array[T]] = new AtomicReference[Array[T]](Array.ofDim(2))
 
@@ -63,7 +63,7 @@ class LifoQueue[T](implicit ct: ClassTag[T]) {
     val array = arrayRef.get()
     array(removePos)
   }
-  
+
   def isEmpty: Boolean = insertPosRef.get() == removePosRef.get()
 
 }
