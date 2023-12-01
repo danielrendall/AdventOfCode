@@ -1,4 +1,4 @@
-val scala3Version = "3.1.0"
+val scala3Version = "3.3.1"
 
 lazy val root = project
   .in(file("."))
@@ -8,5 +8,5 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.specs2" %% "specs2-core" % "5.0.0-RC-22" % Test
+    libraryDependencies += "org.specs2" %% "specs2-core" % "5.4.1" % Test
   )
