@@ -201,21 +201,29 @@ object ArrayUtils {
   }
 
   case class Loc(x: Int, y: Int) {
-    def up: Loc = copy(y = y - 1)
+    def up: Loc = up(1)
+    def up(dist: Int): Loc = copy(y = y - dist)
 
-    def down: Loc = copy(y = y + 1)
+    def down: Loc = down(1)
+    def down(dist: Int): Loc = copy(y = y + dist)
 
-    def left: Loc = copy(x = x - 1)
+    def left: Loc = left(1)
+    def left(dist: Int): Loc = copy(x = x - dist)
 
-    def right: Loc = copy(x = x + 1)
+    def right: Loc = right(1)
+    def right(dist: Int): Loc = copy(x = x + dist)
 
-    def upLeft: Loc = Loc(x - 1, y - 1)
+    def upLeft: Loc = upLeft(1)
+    def upLeft(dist: Int): Loc = Loc(x - dist, y - dist)
 
-    def upRight: Loc = Loc(x + 1, y - 1)
+    def upRight: Loc = upRight(1)
+    def upRight(dist: Int): Loc = Loc(x + dist, y - dist)
 
-    def downLeft: Loc = Loc(x - 1, y + 1)
+    def downLeft: Loc = downLeft(1)
+    def downLeft(dist: Int): Loc = Loc(x - dist, y + dist)
 
-    def downRight: Loc = Loc(x + 1, y + 1)
+    def downRight: Loc = downRight(1)
+    def downRight(dist: Int): Loc = Loc(x + dist, y + dist)
 
     def gridAdjacent: Seq[Loc] = Seq(up, right, down, left)
 
