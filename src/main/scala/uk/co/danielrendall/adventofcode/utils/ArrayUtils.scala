@@ -201,6 +201,19 @@ object ArrayUtils {
   }
 
   case class Loc(x: Int, y: Int) {
+
+    def apply(move: Move): Loc = move match {
+      case Move.NoMove => this
+      case Move.Up(distance) => up(distance)
+      case Move.UpLeft(distance) => upLeft(distance)
+      case Move.Left(distance) => left(distance)
+      case Move.DownLeft(distance) => downLeft(distance)
+      case Move.Down(distance) => down(distance)
+      case Move.DownRight(distance) => downRight(distance)
+      case Move.Right(distance) => right(distance)
+      case Move.UpRight(distance) => upRight(distance)
+    }
+
     def up: Loc = up(1)
     def up(dist: Int): Loc = copy(y = y - dist)
 
@@ -232,4 +245,12 @@ object ArrayUtils {
     def get[T](array2D: Array2D[T]): T = array2D.array(y)(x)
   }
 
+  sealed abstract class LinearDirection(val op: Loc => Loc, _opposite: => LinearDirection) {
+    final lazy val opposite: LinearDirection = _opposite
+  }
+
+  case object Up extends LinearDirection(_.up, Down)
+  case object Down extends LinearDirection(_.down, Up)
+  case object Left extends LinearDirection(_.left, Right)
+  case object Right extends LinearDirection(_.right, Left)
 }
