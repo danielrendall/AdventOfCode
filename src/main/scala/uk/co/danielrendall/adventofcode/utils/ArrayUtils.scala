@@ -145,6 +145,26 @@ object ArrayUtils {
       newArray
     }
 
+    def insertRow(idx: Int, value: T): Array2D[T] = {
+      val newHeight = height + 1
+      Array2D.fill(width, newHeight)(borderValue).map { loc =>
+        if (loc.y <= idx)
+          get(loc)
+        else
+          get(loc.up)
+      }
+    }
+
+    def insertCol(idx: Int, value: T): Array2D[T] = {
+      val newWidth = width + 1
+      Array2D.fill(newWidth, height)(borderValue).map { loc =>
+        if (loc.x <= idx)
+          get(loc)
+        else
+          get(loc.left)
+      }
+    }
+
 
     private def numList(start: Int, inclusiveEnd: Int): LazyList[Int] =
       (start to inclusiveEnd).to(LazyList)
