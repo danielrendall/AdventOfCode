@@ -37,10 +37,8 @@ object Day1 {
       val pairs: (LazyList[Int], LazyList[Int]) = list.collect {
         case NumberRegex(num1, num2) => (num1.toInt, num2.toInt)
       }.unzip[Int, Int]
-      val firstList = pairs._1
-      val secondList = pairs._2
-      val countsInSecondList: Map[Int, Int] = secondList.groupBy(identity).map { case (num, list) => (num, list.length)}
-      firstList.groupBy(identity).map { case (num, list) => num * list.length * countsInSecondList.getOrElse(num, 0)}.sum
+      val countsInSecondList: Map[Int, Int] = pairs._2.groupBy(identity).map { case (num, list) => (num, list.length)}
+      pairs._1.groupBy(identity).map { case (num, list) => num * list.length * countsInSecondList.getOrElse(num, 0)}.sum
 
 
     println("Test: " + solve(testData))
