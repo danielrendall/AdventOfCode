@@ -72,7 +72,7 @@ object Day15 {
 
 
   def solveForArray(array2d: Array2D[RiskAndPath]): RiskAndPath =
-    val initialState = State(array2d.update(Loc(1, 1), _.copy(risk = 0, List(Loc(1, 1)))), Queue(Loc(1, 1)))
+    val initialState = State(array2d.update(Loc(1, 1), _.copy(risk = 0, bestPathSoFar = List(Loc(1, 1)))), Queue(Loc(1, 1)))
 
     val states: LazyList[State] = LazyList.unfold(initialState) { currentState =>
       currentState.locationsToCheck.dequeueOption.map { case (loc, restOfQueue) =>
@@ -89,7 +89,7 @@ object Day15 {
             // A better path; need to update the array, and add the new location for investigation
             // We copy it to preserve its value
             // It is _much_ faster to run if we mutate the array rather than making a copy...
-            (array.updateMut(adjacentLoc, _.copy(risk = possiblyBetterRisk, adjacentLoc :: currentRiskAndPath.bestPathSoFar)), adjacentLoc :: newLocations)
+            (array.updateMut(adjacentLoc, _.copy(risk = possiblyBetterRisk, bestPathSoFar = adjacentLoc :: currentRiskAndPath.bestPathSoFar)), adjacentLoc :: newLocations)
           } else {
             (array, newLocations)
           }
