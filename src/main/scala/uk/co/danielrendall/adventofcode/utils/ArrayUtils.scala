@@ -268,9 +268,37 @@ object ArrayUtils {
   sealed abstract class LinearDirection(val op: Loc => Loc, _opposite: => LinearDirection) {
     final lazy val opposite: LinearDirection = _opposite
   }
+  
+  object LinearDirection {
+    case object Up extends LinearDirection(_.up, Down)
+    case object Right extends LinearDirection(_.right, Left)
+    case object Down extends LinearDirection(_.down, Up)
+    case object Left extends LinearDirection(_.left, Right)
+  }
+  sealed abstract class CompassDirection(val op: Loc => Loc, _forwardRight: => CompassDirection) {
+    final lazy val forwardRight = _forwardRight
+    final lazy val right = forwardRight.forwardRight
+    final lazy val backRight = right.forwardRight
+    final lazy val back = backRight.forwardRight
+    final lazy val backLeft = back.forwardRight
+    final lazy val left = backLeft.forwardRight
+    final lazy val forwardLeft = left.forwardRight
 
-  case object Up extends LinearDirection(_.up, Down)
-  case object Down extends LinearDirection(_.down, Up)
-  case object Left extends LinearDirection(_.left, Right)
-  case object Right extends LinearDirection(_.right, Left)
+    final lazy val opposite: CompassDirection = back
+  }
+  
+  object CompassDirection {
+    case object Up extends CompassDirection(_.up, UpRight)
+    case object UpRight extends CompassDirection(_.upRight, Right)
+    case object Right extends CompassDirection(_.right, DownRight)
+    case object DownRight extends CompassDirection(_.downRight, Down)
+    case object Down extends CompassDirection(_.down, DownLeft)
+    case object DownLeft extends CompassDirection(_.downLeft, Left)
+    case object Left extends CompassDirection(_.left, UpLeft)
+    case object UpLeft extends CompassDirection(_.upLeft, Up)
+
+    val all: Seq[CompassDirection] = Seq(Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft)
+    val rectilinear: Seq[CompassDirection] = Seq(Up, Right, Down, Left)
+    val diagonal: Seq[CompassDirection] = Seq(UpRight, DownRight, DownLeft, UpLeft)
+  }
 }
