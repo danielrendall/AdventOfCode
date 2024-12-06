@@ -265,15 +265,25 @@ object ArrayUtils {
     def get[T](array2D: Array2D[T]): T = array2D.array(y)(x)
   }
 
-  sealed abstract class LinearDirection(val op: Loc => Loc, _opposite: => LinearDirection) {
-    final lazy val opposite: LinearDirection = _opposite
+  sealed abstract class LinearDirection(val op: Loc => Loc, _right: => LinearDirection) {
+    final lazy val right: LinearDirection = _right
+    final lazy val back: LinearDirection = right.right
+    final lazy val left: LinearDirection = back.right
+    
+    final lazy val opposite: LinearDirection = back
+    
+    final lazy val move: Move = this match
+      case LinearDirection.Up => Move.up
+      case LinearDirection.Right => Move.right
+      case LinearDirection.Down => Move.down
+      case LinearDirection.Left => Move.left
   }
   
   object LinearDirection {
-    case object Up extends LinearDirection(_.up, Down)
-    case object Right extends LinearDirection(_.right, Left)
-    case object Down extends LinearDirection(_.down, Up)
-    case object Left extends LinearDirection(_.left, Right)
+    case object Up extends LinearDirection(_.up, Right)
+    case object Right extends LinearDirection(_.right, Down)
+    case object Down extends LinearDirection(_.down, Left)
+    case object Left extends LinearDirection(_.left, Up)
   }
   sealed abstract class CompassDirection(val op: Loc => Loc, _forwardRight: => CompassDirection) {
     final lazy val forwardRight = _forwardRight
@@ -285,6 +295,16 @@ object ArrayUtils {
     final lazy val forwardLeft = left.forwardRight
 
     final lazy val opposite: CompassDirection = back
+    
+    final lazy val move: Move = this match
+      case CompassDirection.Up => Move.up
+      case CompassDirection.UpRight => Move.upRight
+      case CompassDirection.Right => Move.right
+      case CompassDirection.DownRight => Move.downRight
+      case CompassDirection.Down => Move.down
+      case CompassDirection.DownLeft => Move.downLeft
+      case CompassDirection.Left => Move.left
+      case CompassDirection.UpLeft => Move.upLeft
   }
   
   object CompassDirection {
