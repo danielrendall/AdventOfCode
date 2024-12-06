@@ -53,7 +53,8 @@ object Day6 {
     def solve(list: LazyList[String]) =
       val array: Array2D[Char] = ArrayUtils.buildBorderedArray[Char](list, identity, ' ')
       val startPos = LocDir(array.findLocs(_ == '^').head, Up)
-      val positions = array.findLocs(_ == '.').filter { poss =>
+      val regularPath = traverse(startPos, array, List(startPos), Set(startPos))
+      val positions = regularPath.tail.map(_.loc).distinct.filter { poss =>
         array.set(poss, '#')
         val ret = try {
           traverse(startPos, array, List(startPos), Set(startPos))
