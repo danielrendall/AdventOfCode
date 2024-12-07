@@ -37,7 +37,7 @@ object Day7 {
     def solve(list: LazyList[String]) =
       val operations = List(multiplication, addition)
       list.map(Equation.apply)
-        .filter(eq => solvable(eq.initial(operations), operations))
+        .filter(eq => solvable(eq.initial, operations))
         .map(_.target)
         .sum
 
@@ -51,7 +51,7 @@ object Day7 {
     def solve(list: LazyList[String]) =
       val operations = List(multiplication, concatenation, addition)
       list.map(Equation.apply)
-        .filter(eq => solvable(eq.initial(operations), operations))
+        .filter(eq => solvable(eq.initial, operations))
         .map(_.target)
         .sum
 
@@ -61,15 +61,9 @@ object Day7 {
 
   case class Equation(target: Long, accum: Long, remaining: List[Long]) {
 
-    def initial(operations: List[CombineOp]): LazyList[Equation] = remaining match {
-      case first :: second :: rest =>
-        (LazyList.unfold[Equation, List[CombineOp]](operations) {
-          case op :: moreOps =>
-            Option((copy(accum = op(first, second), remaining = rest)), moreOps)
-          case _ => Option.empty
-        }).filterNot(_.failed)
-      case _ => throw new IllegalArgumentException("Not enough items to start")
-    }
+    def initial: LazyList[Equation] = remaining match
+      case head :: rest => LazyList(Equation(target, head, rest))
+      case _ => throw new IllegalArgumentException("Not enough numbers")
 
     def possibles(operations: List[CombineOp]): LazyList[Equation] = remaining match {
       case next :: rest =>
