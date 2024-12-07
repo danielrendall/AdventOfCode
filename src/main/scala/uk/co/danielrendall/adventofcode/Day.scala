@@ -13,13 +13,11 @@ object Day {
   @main def dxp1(): Unit = {
     def solve(list: LazyList[String]) = ""
 
-
     println("Test: " + solve(testData))
     println("Actual: " + solve(numbers))
   }
 
   @main def dxp2(): Unit = {
-
     def solve(list: LazyList[String]) = ""
 
     println("Test: " + solve(testData))
