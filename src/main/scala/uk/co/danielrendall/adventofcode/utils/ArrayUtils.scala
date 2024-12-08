@@ -29,6 +29,11 @@ object ArrayUtils {
       x <- 1 to width
     } yield Loc(x, y)
 
+    def locsAndValues: Seq[(Loc, T)] = for {
+      y <- 1 to height
+      x <- 1 to width
+    } yield (Loc(x, y), array(y)(x))
+
     def map(fn: Loc => T): Array2D[T] = {
       val middle = (for {
         y <- 1 to height
