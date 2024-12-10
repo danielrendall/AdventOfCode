@@ -16,6 +16,20 @@ object ArrayUtils {
     val height = array.length - 2
     Array2D(array, width, height)
 
+  def buildEmptyArray[T](width: Int,
+                         height: Int,
+                         initialValue: Loc => T,
+                         borderValue: T)
+                        (implicit ct: ClassTag[T]): Array2D[T] =
+    // Add a border
+    val firstAndLast = Array.fill[T](width + 2)(borderValue)
+    val middle: Array[Array[T]] =
+      (0 until height)
+        .map(y => (0 until width)
+          .map(x => initialValue(Loc(x, y))).toArray).map(a => (borderValue +: a :+ borderValue)).toArray
+    val array = firstAndLast +: middle :+ firstAndLast
+    Array2D(array, width, height)
+
 
   // Width and Height don't include the border
   case class Array2D[T](array: Array[Array[T]], width: Int, height: Int)
@@ -240,27 +254,35 @@ object ArrayUtils {
     }
 
     def up: Loc = up(1)
+
     def up(dist: Int): Loc = copy(y = y - dist)
 
     def down: Loc = down(1)
+
     def down(dist: Int): Loc = copy(y = y + dist)
 
     def left: Loc = left(1)
+
     def left(dist: Int): Loc = copy(x = x - dist)
 
     def right: Loc = right(1)
+
     def right(dist: Int): Loc = copy(x = x + dist)
 
     def upLeft: Loc = upLeft(1)
+
     def upLeft(dist: Int): Loc = Loc(x - dist, y - dist)
 
     def upRight: Loc = upRight(1)
+
     def upRight(dist: Int): Loc = Loc(x + dist, y - dist)
 
     def downLeft: Loc = downLeft(1)
+
     def downLeft(dist: Int): Loc = Loc(x - dist, y + dist)
 
     def downRight: Loc = downRight(1)
+
     def downRight(dist: Int): Loc = Loc(x + dist, y + dist)
 
     def gridAdjacent: Seq[Loc] = Seq(up, right, down, left)
@@ -274,22 +296,30 @@ object ArrayUtils {
     final lazy val right: LinearDirection = _right
     final lazy val back: LinearDirection = right.right
     final lazy val left: LinearDirection = back.right
-    
+
     final lazy val opposite: LinearDirection = back
-    
+
+    def apply(loc: Loc): Loc = op(loc)
+
     final lazy val move: Move = this match
       case LinearDirection.Up => Move.up
       case LinearDirection.Right => Move.right
       case LinearDirection.Down => Move.down
       case LinearDirection.Left => Move.left
   }
-  
+
   object LinearDirection {
     case object Up extends LinearDirection(_.up, Right)
+
     case object Right extends LinearDirection(_.right, Down)
+
     case object Down extends LinearDirection(_.down, Left)
+
     case object Left extends LinearDirection(_.left, Up)
+
+    val all = Seq(Up, Right, Down, Left)
   }
+
   sealed abstract class CompassDirection(val op: Loc => Loc, _forwardRight: => CompassDirection) {
     final lazy val forwardRight = _forwardRight
     final lazy val right = forwardRight.forwardRight
@@ -300,7 +330,7 @@ object ArrayUtils {
     final lazy val forwardLeft = left.forwardRight
 
     final lazy val opposite: CompassDirection = back
-    
+
     final lazy val move: Move = this match
       case CompassDirection.Up => Move.up
       case CompassDirection.UpRight => Move.upRight
@@ -311,15 +341,22 @@ object ArrayUtils {
       case CompassDirection.Left => Move.left
       case CompassDirection.UpLeft => Move.upLeft
   }
-  
+
   object CompassDirection {
     case object Up extends CompassDirection(_.up, UpRight)
+
     case object UpRight extends CompassDirection(_.upRight, Right)
+
     case object Right extends CompassDirection(_.right, DownRight)
+
     case object DownRight extends CompassDirection(_.downRight, Down)
+
     case object Down extends CompassDirection(_.down, DownLeft)
+
     case object DownLeft extends CompassDirection(_.downLeft, Left)
+
     case object Left extends CompassDirection(_.left, UpLeft)
+
     case object UpLeft extends CompassDirection(_.upLeft, Up)
 
     val all: Seq[CompassDirection] = Seq(Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft)
