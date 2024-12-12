@@ -43,6 +43,11 @@ object ArrayUtils {
       x <- 1 to width
     } yield Loc(x, y)
 
+    def locsLazy: LazyList[Loc] = for {
+      y <- LazyList.from(1).takeWhile(_ <= height)
+      x <- LazyList.from(1).takeWhile(_ <= width)
+    } yield Loc(x, y)
+
     def locsAndValues: Seq[(Loc, T)] = for {
       y <- 1 to height
       x <- 1 to width
@@ -198,6 +203,8 @@ object ArrayUtils {
     def contains(loc: Loc): Boolean = loc.x >= 1 && loc.x <= width && loc.y >= 1 && loc.y <= height
 
     def findLocs(pred: T => Boolean): Seq[Loc] = locs.filter(l => pred(get(l)))
+    
+    def findLocsLazy(pred: T => Boolean): LazyList[Loc] = locsLazy.filter(l => pred(get(l)))
   }
 
   object Array2D {
@@ -317,7 +324,7 @@ object ArrayUtils {
 
     case object Left extends LinearDirection(_.left, Up)
 
-    val all = Seq(Up, Right, Down, Left)
+    lazy val all: Seq[LinearDirection] = Seq(Up, Right, Down, Left)
   }
 
   sealed abstract class CompassDirection(val op: Loc => Loc, _forwardRight: => CompassDirection) {
